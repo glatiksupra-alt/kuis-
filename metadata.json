@@ -1,0 +1,6 @@
+{
+  "name": "Kuis Interaktif & Spreadsheet Nilai",
+  "description": "Aplikasi kuis evaluasi SOP & Planogram Merchandising KAO dengan rekapitulasi otomatis ke spreadsheet tersusun dari nilai tertinggi ke terendah, podium animasi juara 1-2-3, dan panel admin soal.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
