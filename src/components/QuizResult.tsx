@@ -24,7 +24,6 @@ interface QuizResultProps {
   onViewSpreadsheet: () => void;
   onRetake: () => void;
   appMode?: AppMode;
-  onViewPodium?: () => void;
 }
 
 export const QuizResultView: React.FC<QuizResultProps> = ({
@@ -34,7 +33,6 @@ export const QuizResultView: React.FC<QuizResultProps> = ({
   onViewSpreadsheet,
   onRetake,
   appMode = 'md',
-  onViewPodium,
 }) => {
   const [showExplanation, setShowExplanation] = useState(false);
 
@@ -83,16 +81,8 @@ export const QuizResultView: React.FC<QuizResultProps> = ({
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ type: 'spring', bounce: 0.3 }}
-        className="bg-white rounded-3xl p-6 sm:p-10 border-3 border-amber-200/90 shadow-xl text-center relative overflow-hidden"
+        className="bg-white rounded-3xl p-6 sm:p-10 border-2 border-emerald-100 shadow-xl text-center relative overflow-hidden"
       >
-        {/* Decorative corner stars */}
-        <div className="absolute -top-3 -left-3 text-4xl select-none animate-wiggle">
-          🌟
-        </div>
-        <div className="absolute -top-3 -right-3 text-4xl select-none animate-wiggle">
-          🎉
-        </div>
-
         {/* Badge Icon with animation */}
         <div className="inline-flex items-center justify-center mb-5">
           {result.isPassed ? (
@@ -138,121 +128,46 @@ export const QuizResultView: React.FC<QuizResultProps> = ({
             <span className="text-2xl sm:text-4xl font-bold text-slate-400">/{result.maxScore}</span>
           </div>
           <div className="mt-2 text-sm font-black text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full inline-block border border-emerald-200">
-            Akurasi {result.percentage}% ({result.correctCount} dari {result.totalQuestions} Benar ✨)
+            Akurasi {result.percentage}% ({result.correctCount} dari {result.totalQuestions} Benar)
           </div>
         </div>
 
-        {/* Podium Highlight for Rank 1, 2, and 3 */}
-        {currentRank <= 3 && (
-          <motion.div
-            initial={{ scale: 0.9, y: 15, opacity: 0 }}
-            animate={{ scale: 1, y: 0, opacity: 1 }}
-            transition={{ type: 'spring', bounce: 0.4, delay: 0.2 }}
-            className={`mb-6 p-4.5 rounded-3xl border-3 shadow-lg relative overflow-hidden text-left ${
-              currentRank === 1
-                ? 'bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-100 border-amber-400 text-amber-950 animate-gold-shine'
-                : currentRank === 2
-                ? 'bg-gradient-to-r from-slate-200 via-slate-100 to-slate-50 border-slate-400 text-slate-900'
-                : 'bg-gradient-to-r from-orange-200 via-amber-100 to-orange-50 border-orange-400 text-amber-950'
-            }`}
-          >
-            {/* Twinkles */}
-            <div className="absolute top-1 right-3 text-lg animate-sparkle-twinkle select-none pointer-events-none">✨</div>
-            <div className="absolute bottom-1 right-8 text-sm animate-sparkle-twinkle select-none pointer-events-none" style={{ animationDelay: '1s' }}>🌟</div>
-
-            <div className="flex items-center space-x-3.5 relative z-10">
-              <div className="relative shrink-0">
-                {currentRank === 1 && (
-                  <motion.div 
-                    animate={{ y: [-4, 4, -4], rotate: [-4, 4, -4] }}
-                    transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-                    className="absolute -top-3.5 left-1/2 -translate-x-1/2 text-2xl select-none"
-                  >
-                    👑
-                  </motion.div>
-                )}
-                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center font-black text-2xl shadow-md border-2 ${
-                  currentRank === 1
-                    ? 'bg-amber-400 text-amber-950 border-amber-500 shadow-amber-400/40'
-                    : currentRank === 2
-                    ? 'bg-slate-300 text-slate-800 border-slate-400'
-                    : 'bg-orange-400 text-white border-orange-500'
-                }`}>
-                  {currentRank === 1 ? '🥇' : currentRank === 2 ? '🥈' : '🥉'}
-                </div>
-              </div>
-
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center space-x-2 mb-0.5">
-                  <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${
-                    currentRank === 1
-                      ? 'bg-amber-950 text-amber-200'
-                      : currentRank === 2
-                      ? 'bg-slate-800 text-slate-100'
-                      : 'bg-amber-900 text-orange-200'
-                  }`}>
-                    {currentRank === 1 ? 'Juara 1 • Posisi Tertinggi' : currentRank === 2 ? 'Juara 2 • Podium Perak' : 'Juara 3 • Podium Perunggu'}
-                  </span>
-                  <span className="text-xs">🎉</span>
-                </div>
-                <h3 className="text-base sm:text-lg font-black tracking-tight leading-snug">
-                  {currentRank === 1 
-                    ? 'Luar Biasa! Namamu Menduduki Posisi #1 di Spreadsheet!' 
-                    : currentRank === 2
-                    ? 'Hebat Sekali! Kamu Berhasil Masuk Podium Juara 2!'
-                    : 'Keren Banget! Kamu Meraih Posisi Podium Juara 3!'}
-                </h3>
-                <p className="text-xs font-semibold opacity-85 mt-0.5">
-                  Pencapaianmu langsung tampil di panggung juara spreadsheet nilai secara realtime.
-                </p>
-              </div>
-            </div>
-          </motion.div>
-        )}
-
-        {/* Live Spreadsheet / Podium Rank Card with Medal styling */}
-        <motion.div 
-          onClick={() => {
-            sounds.playPop();
-            if (appMode === 'admin') {
-              onViewSpreadsheet();
-            } else {
-              onViewPodium ? onViewPodium() : onViewSpreadsheet();
-            }
-          }}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          className={`mb-8 p-4.5 rounded-2xl text-white shadow-lg flex flex-col sm:flex-row items-center justify-between gap-3 text-left cursor-pointer border-b-4 ${
-            currentRank === 1
-              ? 'bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 border-amber-700 shadow-amber-500/30 ring-2 ring-amber-300'
-              : currentRank === 2
-              ? 'bg-gradient-to-r from-slate-600 via-slate-500 to-slate-700 border-slate-800 shadow-slate-500/25 ring-2 ring-slate-300'
-              : currentRank === 3
-              ? 'bg-gradient-to-r from-amber-700 via-orange-600 to-amber-800 border-amber-900 shadow-orange-500/25 ring-2 ring-orange-300'
-              : 'bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 border-orange-700 shadow-orange-500/25'
-          }`}
-        >
+        {/* Rank / Performance Indicator */}
+        <div className={`mb-8 p-4.5 rounded-2xl text-white shadow-lg flex flex-col sm:flex-row items-center justify-between gap-3 text-left border-b-4 ${
+          result.isPassed
+            ? 'bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 border-emerald-900 shadow-emerald-600/25'
+            : 'bg-gradient-to-r from-amber-600 via-orange-600 to-amber-700 border-amber-900 shadow-amber-600/25'
+        }`}>
           <div className="flex items-center space-x-3.5">
             <div className="w-11 h-11 rounded-2xl bg-white/20 backdrop-blur-xs flex items-center justify-center text-white shrink-0 font-black text-lg">
-              {currentRank <= 3 ? '🏆' : `#${currentRank}`}
+              {result.isPassed ? '✓' : '•'}
             </div>
             <div>
-              <span className="text-xs uppercase tracking-wider font-extrabold text-amber-100">
-                {appMode === 'admin' ? 'Peringkat di Rekap Merchandiser KAO' : 'Posisi di Panggung Juara MD'}
+              <span className="text-xs uppercase tracking-wider font-extrabold text-emerald-100">
+                Peringkat Hasil Evaluasi
               </span>
               <p className="text-base font-black">
                 {getRankMedal(currentRank)}{' '}
                 <span className="text-xs font-bold text-white/90">
-                  (dari {totalParticipants} MD terurut)
+                  (dari {totalParticipants} peserta terdaftar)
                 </span>
               </p>
             </div>
           </div>
-          <div className="flex items-center space-x-1.5 text-xs font-black bg-white text-orange-600 px-3.5 py-2 rounded-xl shadow-xs">
-            <span>{appMode === 'admin' ? 'Buka Lembar Nilai' : 'Buka Podium Juara'}</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </div>
-        </motion.div>
+          {appMode === 'admin' && (
+            <button
+              type="button"
+              onClick={() => {
+                sounds.playPop();
+                onViewSpreadsheet();
+              }}
+              className="flex items-center space-x-1.5 text-xs font-black bg-white text-emerald-800 px-3.5 py-2 rounded-xl shadow-xs hover:bg-slate-50 cursor-pointer"
+            >
+              <span>Buka Rekap Spreadsheet</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
 
         {/* Summary Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-left mb-8">
@@ -288,7 +203,7 @@ export const QuizResultView: React.FC<QuizResultProps> = ({
 
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-          {appMode === 'admin' ? (
+          {appMode === 'admin' && (
             <motion.button
               type="button"
               onClick={() => {
@@ -301,24 +216,6 @@ export const QuizResultView: React.FC<QuizResultProps> = ({
             >
               <FileSpreadsheet className="w-4 h-4" />
               <span>Buka Spreadsheet Nilai 📊</span>
-            </motion.button>
-          ) : (
-            <motion.button
-              type="button"
-              onClick={() => {
-                sounds.playPop();
-                if (onViewPodium) {
-                  onViewPodium();
-                } else {
-                  onViewSpreadsheet();
-                }
-              }}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="w-full sm:w-auto flex items-center justify-center space-x-2 py-3.5 px-6 rounded-2xl font-black text-sm bg-gradient-to-r from-amber-500 to-yellow-500 text-white hover:from-amber-600 hover:to-yellow-600 border-b-3 border-amber-700 shadow-md shadow-amber-500/25 cursor-pointer"
-            >
-              <Trophy className="w-4 h-4" />
-              <span>Lihat Panggung Juara 🏆</span>
             </motion.button>
           )}
 
@@ -344,9 +241,9 @@ export const QuizResultView: React.FC<QuizResultProps> = ({
             }}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            className="w-full sm:w-auto flex items-center justify-center space-x-2 py-3.5 px-5 rounded-2xl font-extrabold text-sm bg-amber-50 text-amber-900 border-2 border-amber-300 hover:bg-amber-100 cursor-pointer"
+            className="w-full sm:w-auto flex items-center justify-center space-x-2 py-3.5 px-5 rounded-2xl font-extrabold text-sm bg-emerald-50 text-emerald-900 border-2 border-emerald-200 hover:bg-emerald-100 cursor-pointer"
           >
-            <HelpCircle className="w-4 h-4 text-amber-600" />
+            <HelpCircle className="w-4 h-4 text-emerald-600" />
             <span>{showExplanation ? 'Tutup Pembahasan' : 'Lihat Kunci Jawaban 💡'}</span>
           </motion.button>
         </div>

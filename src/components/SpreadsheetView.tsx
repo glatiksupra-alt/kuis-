@@ -24,7 +24,6 @@ import { motion, AnimatePresence } from 'motion/react';
 import { QuizResult } from '../types';
 import { exportResultsToCSV, exportResultsToTSV, formatDate, formatDuration, sortResultsDescending } from '../utils/storage';
 import { sounds } from '../utils/sound';
-import { PodiumTop3 } from './PodiumTop3';
 import { AdminPinModal } from './android/AdminPinModal';
 
 interface SpreadsheetViewProps {
@@ -258,15 +257,6 @@ export const SpreadsheetView: React.FC<SpreadsheetViewProps> = ({
           </motion.button>
         </div>
       </div>
-
-      {/* Cheerful 3D Animated Podium for Juara 1, 2, dan 3 */}
-      {sortedAllResults.length > 0 && (
-        <PodiumTop3 
-          results={sortedAllResults} 
-          title="Panggung Juara 1, 2, dan 3 🏆"
-          subtitle="Peringkat tertinggi otomatis terurut dari nilai terbesar dan waktu pengerjaan tercepat"
-        />
-      )}
 
       {/* Formula & Metrics Ribbon */}
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-6">

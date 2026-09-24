@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { AppView, AppMode, AuthUser, Question, QuizResult, QuizSettings } from './types';
+import { AppView, AppMode, AuthUser, Question, QuizResult, QuizSettings, BannerSettings } from './types';
 import { 
   addQuizResult, 
   clearAllQuizResults, 
@@ -14,7 +14,9 @@ import {
   getSavedAppMode,
   saveAppMode,
   loadAuthUser,
-  clearAuthUser
+  clearAuthUser,
+  loadBannerSettings,
+  saveBannerSettings
 } from './utils/storage';
 import { Navbar } from './components/Navbar';
 import { QuizStart } from './components/QuizStart';
@@ -22,7 +24,6 @@ import { QuizTaking } from './components/QuizTaking';
 import { QuizResultView } from './components/QuizResult';
 import { SpreadsheetView } from './components/SpreadsheetView';
 import { AdminPanel } from './components/AdminPanel';
-import { PodiumView } from './components/PodiumView';
 import { LoginScreen } from './components/LoginScreen';
 import { AndroidDeviceFrame } from './components/android/AndroidDeviceFrame';
 import { AdminPinModal } from './components/android/AdminPinModal';
@@ -33,6 +34,7 @@ export default function App() {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [settings, setSettings] = useState<QuizSettings>(loadQuizSettings);
   const [results, setResults] = useState<QuizResult[]>([]);
+  const [bannerSettings, setBannerSettings] = useState<BannerSettings>(loadBannerSettings);
   
   // App Mode State: Mode 'md' is the default mode (Merchandiser: only questions & podium)
   // Mode 'admin' requires PIN verification to access questions bank, settings, and spreadsheet
@@ -53,7 +55,13 @@ export default function App() {
     setQuestions(loadQuestions());
     setSettings(loadQuizSettings());
     setResults(loadQuizResults());
+    setBannerSettings(loadBannerSettings());
   }, []);
+
+  const handleSaveBannerSettings = (newSettings: BannerSettings) => {
+    setBannerSettings(newSettings);
+    saveBannerSettings(newSettings);
+  };
 
   // Shuffle helper
   const shuffleArray = <T,>(arr: T[]): T[] => {
@@ -266,8 +274,9 @@ export default function App() {
             onViewSpreadsheet={() => setCurrentView('spreadsheet')}
             onOpenAdmin={() => handleNavigate('admin')}
             appMode={appMode}
-            onViewPodium={() => setCurrentView('podium')}
             currentUser={currentUser}
+            bannerSettings={bannerSettings}
+            onSaveBannerSettings={handleSaveBannerSettings}
           />
         )}
 
@@ -290,7 +299,6 @@ export default function App() {
             onViewSpreadsheet={() => setCurrentView('spreadsheet')}
             onRetake={() => setCurrentView('quiz-start')}
             appMode={appMode}
-            onViewPodium={() => setCurrentView('podium')}
           />
         )}
 
@@ -307,15 +315,6 @@ export default function App() {
           />
         )}
 
-        {currentView === 'podium' && (
-          <PodiumView
-            results={results}
-            onStartQuiz={() => setCurrentView('quiz-start')}
-            onViewSpreadsheet={() => setCurrentView('spreadsheet')}
-            appMode={appMode}
-          />
-        )}
-
         {currentView === 'admin' && (
           <AdminPanel
             questions={questions}
@@ -325,6 +324,8 @@ export default function App() {
             onResetFactory={handleResetFactory}
             onViewSpreadsheet={() => setCurrentView('spreadsheet')}
             onLogoutAdmin={handleSwitchToMdMode}
+            bannerSettings={bannerSettings}
+            onSaveBannerSettings={handleSaveBannerSettings}
           />
         )}
       </AndroidDeviceFrame>

@@ -58,3 +58,18 @@ export interface AuthUser {
   area?: string; // e.g. Alfamart, Indomaret, Hypermart, Superindo, dll.
   loginAt: string;
 }
+
+export interface CarouselSlide {
+  id: string;
+  title: string;
+  tag?: string;
+  subtitle?: string;
+  imageUrl: string;
+  isActive: boolean;
+}
+
+export interface BannerSettings {
+  autoSlideIntervalSeconds: number; // e.g. 4 seconds
+  isAutoSlideEnabled: boolean;
+  slides: CarouselSlide[];
+}

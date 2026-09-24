@@ -20,13 +20,16 @@ import {
   Lock,
   KeyRound,
   ShieldCheck,
-  AlertCircle
+  AlertCircle,
+  Image as ImageIcon
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Question, QuizSettings } from '../types';
+import { Question, QuizSettings, BannerSettings } from '../types';
 import { QuestionModal } from './QuestionModal';
 import { sounds } from '../utils/sound';
 import { getAdminPin, saveAdminPin, verifyAdminPin, resetAdminPin, DEFAULT_ADMIN_PIN } from '../utils/storage';
+import { PhotoSlideBar } from './PhotoSlideBar';
+import { PhotoSlideModal } from './PhotoSlideModal';
 
 interface AdminPanelProps {
   questions: Question[];
@@ -36,6 +39,8 @@ interface AdminPanelProps {
   onResetFactory: () => void;
   onViewSpreadsheet: () => void;
   onLogoutAdmin?: () => void;
+  bannerSettings?: BannerSettings;
+  onSaveBannerSettings?: (settings: BannerSettings) => void;
 }
 
 export const AdminPanel: React.FC<AdminPanelProps> = ({
@@ -46,11 +51,14 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   onResetFactory,
   onViewSpreadsheet,
   onLogoutAdmin,
+  bannerSettings,
+  onSaveBannerSettings,
 }) => {
-  const [activeTab, setActiveTab] = useState<'questions' | 'settings' | 'spreadsheet'>('questions');
+  const [activeTab, setActiveTab] = useState<'questions' | 'settings' | 'banners' | 'spreadsheet'>('questions');
   const [editingQuestion, setEditingQuestion] = useState<Question | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
+  const [isPhotoSlideModalOpen, setIsPhotoSlideModalOpen] = useState(false);
 
   // Settings form state
   const [title, setTitle] = useState(settings.title);
@@ -402,6 +410,22 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
         >
           <Settings2 className="w-4 h-4" />
           <span>Pengaturan Kuis & KKM</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => {
+            sounds.playPop();
+            setActiveTab('banners');
+          }}
+          className={`flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-black flex items-center justify-center space-x-2 transition-all cursor-pointer ${
+            activeTab === 'banners'
+              ? 'bg-amber-400 text-slate-950 shadow-xs'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-amber-50'
+          }`}
+        >
+          <ImageIcon className="w-4 h-4" />
+          <span>Bar Foto Slide ({bannerSettings?.slides?.length || 0})</span>
         </button>
 
         <button
@@ -908,7 +932,99 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
         </div>
       )}
 
-      {/* Tab 3: Spreadsheet Integration Guide */}
+      {/* Tab 3: Photo Slide Bar Management */}
+      {activeTab === 'banners' && (
+        <div className="bg-white rounded-3xl p-6 sm:p-8 border-2 border-amber-200/80 shadow-2xs space-y-6 max-w-4xl">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-slate-200">
+            <div className="flex items-center space-x-3">
+              <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-700 text-white flex items-center justify-center text-xl shadow-md shadow-emerald-600/30">
+                <ImageIcon className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="text-lg font-black text-slate-900">
+                  Pengaturan Bar Foto Slide KAO
+                </h3>
+                <p className="text-xs font-bold text-slate-500">
+                  Kelola foto display produk, rotasi slide otomatis, dan panduan merchandising yang tampil di bawah tombol kuis.
+                </p>
+              </div>
+            </div>
+
+            {bannerSettings && onSaveBannerSettings && (
+              <button
+                type="button"
+                onClick={() => {
+                  sounds.playPop();
+                  setIsPhotoSlideModalOpen(true);
+                }}
+                className="inline-flex items-center space-x-2 px-4 py-2.5 rounded-2xl text-xs font-black text-white bg-emerald-700 hover:bg-emerald-800 shadow-md shadow-emerald-700/25 cursor-pointer"
+              >
+                <Sliders className="w-4 h-4" />
+                <span>Atur & Upload Foto Slide</span>
+              </button>
+            )}
+          </div>
+
+          {/* Live Preview of Photo Slide Bar */}
+          {bannerSettings && onSaveBannerSettings && (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-black uppercase tracking-wider text-slate-500">
+                  Pratinjau Langsung (Live Preview):
+                </span>
+                <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+                  {bannerSettings.isAutoSlideEnabled ? `Slide Otomatis: Aktif (${bannerSettings.autoSlideIntervalSeconds}s)` : 'Slide Otomatis: Nonaktif'}
+                </span>
+              </div>
+
+              <div className="max-w-xl mx-auto p-4 rounded-3xl bg-slate-50 border border-slate-200 shadow-xs">
+                <PhotoSlideBar
+                  bannerSettings={bannerSettings}
+                  onSaveSettings={onSaveBannerSettings}
+                  isAdmin={true}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Slide List Summary */}
+          {bannerSettings && (
+            <div className="space-y-3 pt-2">
+              <h4 className="text-xs font-black uppercase tracking-wider text-slate-600">
+                Daftar Foto Saat Ini ({bannerSettings.slides.length} Foto):
+              </h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {bannerSettings.slides.map((slide, idx) => (
+                  <div 
+                    key={slide.id}
+                    className="p-3 rounded-2xl border border-slate-200 bg-slate-50/70 flex items-center space-x-3"
+                  >
+                    <div className="w-16 h-12 rounded-xl overflow-hidden bg-slate-200 shrink-0 border border-slate-300 relative">
+                      <img src={slide.imageUrl} alt={slide.title} className="w-full h-full object-cover" />
+                      <span className="absolute bottom-0 right-0 bg-black/80 text-white text-[9px] font-black px-1 rounded-tl-md">
+                        #{idx + 1}
+                      </span>
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center space-x-1">
+                        <p className="text-xs font-black text-slate-900 truncate">{slide.title}</p>
+                        {slide.tag && (
+                          <span className="text-[9px] font-bold bg-emerald-100 text-emerald-800 px-1.5 py-0.2 rounded-md shrink-0">
+                            {slide.tag}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-[11px] text-slate-500 truncate mt-0.5">{slide.subtitle || '-'}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Tab 4: Spreadsheet Integration Guide */}
       {activeTab === 'spreadsheet' && (
         <div className="bg-white rounded-3xl p-6 sm:p-8 border-2 border-amber-200/80 shadow-2xs space-y-6 max-w-3xl">
           <div className="flex items-center space-x-3">
@@ -974,6 +1090,16 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
         onSave={handleSaveQuestion}
         initialQuestion={editingQuestion}
       />
+
+      {/* Modal Slide Foto Bar */}
+      {bannerSettings && onSaveBannerSettings && (
+        <PhotoSlideModal
+          isOpen={isPhotoSlideModalOpen}
+          onClose={() => setIsPhotoSlideModalOpen(false)}
+          bannerSettings={bannerSettings}
+          onSaveSettings={onSaveBannerSettings}
+        />
+      )}
 
       {/* Delete Question Confirm Modal */}
       <AnimatePresence>

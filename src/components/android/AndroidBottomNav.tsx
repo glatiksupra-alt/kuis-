@@ -42,27 +42,21 @@ export const AndroidBottomNav: React.FC<AndroidBottomNavProps> = ({
 
   const isMdMode = appMode === 'md';
 
-  // Mode MD ONLY displays Pertanyaan (Evaluasi) and Podium
+  // Mode MD ONLY displays Kuis Merchandising (podium removed)
   const mdNavItems: { view: AppView; label: string; icon: React.ReactNode; badge?: string | number }[] = [
     {
       view: 'quiz-start',
-      label: 'Pertanyaan SOP',
+      label: 'Kuis Merchandising',
       icon: <ClipboardCheck className="w-5 h-5" />,
       badge: questionCount > 0 ? `${questionCount} Soal` : undefined,
     },
-    {
-      view: 'podium',
-      label: 'Podium Juara',
-      icon: <Trophy className="w-5 h-5" />,
-      badge: participantCount >= 3 ? 'Top 3' : undefined,
-    },
   ];
 
-  // Mode Admin displays all 4 tabs
+  // Mode Admin displays 3 tabs: Evaluasi, Rekap Nilai, and Admin SOP (podium removed)
   const adminNavItems: { view: AppView; label: string; icon: React.ReactNode; badge?: string | number }[] = [
     {
       view: 'quiz-start',
-      label: 'Evaluasi',
+      label: 'Kuis SOP',
       icon: <ClipboardCheck className="w-5 h-5" />,
       badge: questionCount > 0 ? `${questionCount} Q` : undefined,
     },
@@ -71,12 +65,6 @@ export const AndroidBottomNav: React.FC<AndroidBottomNavProps> = ({
       label: 'Rekap Nilai',
       icon: <TableProperties className="w-5 h-5" />,
       badge: participantCount > 0 ? participantCount : undefined,
-    },
-    {
-      view: 'podium',
-      label: 'Podium',
-      icon: <Trophy className="w-5 h-5" />,
-      badge: participantCount >= 3 ? 'Top 3' : undefined,
     },
     {
       view: 'admin',
@@ -90,7 +78,7 @@ export const AndroidBottomNav: React.FC<AndroidBottomNavProps> = ({
 
   return (
     <nav className="bg-white/95 backdrop-blur-md border-t border-emerald-100/90 pt-1.5 pb-2 px-2 flex flex-col items-center select-none z-30 shadow-lg">
-      <div className={`w-full grid ${isMdMode ? 'grid-cols-2 max-w-xs' : 'grid-cols-4 max-w-md'} gap-1 transition-all duration-300`}>
+      <div className={`w-full grid ${isMdMode ? 'grid-cols-1 max-w-[200px]' : 'grid-cols-3 max-w-sm'} gap-1 transition-all duration-300`}>
         {activeNavItems.map((item) => {
           const isActive = currentView === item.view;
           return (

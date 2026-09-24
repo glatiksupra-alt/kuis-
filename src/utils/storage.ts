@@ -1,5 +1,6 @@
-import { Question, QuizResult, QuizSettings, AuthUser } from '../types';
+import { Question, QuizResult, QuizSettings, AuthUser, BannerSettings } from '../types';
 import { DEFAULT_QUESTIONS, DEFAULT_QUIZ_SETTINGS, INITIAL_SAMPLE_RESULTS } from '../data/defaultQuiz';
+import { DEFAULT_BANNER_SETTINGS } from '../data/defaultSlides';
 
 const STORAGE_KEYS = {
   QUESTIONS: 'kao_merchandising_questions_v2',
@@ -8,6 +9,7 @@ const STORAGE_KEYS = {
   ADMIN_PIN: 'kao_merchandising_admin_pin_v2',
   APP_MODE: 'kao_merchandising_mode_v2',
   AUTH_USER: 'kao_merchandising_auth_user_v2',
+  BANNER_SETTINGS: 'kao_merchandising_banner_settings_v2',
 };
 
 // Sort results: highest score first; if tied, faster duration first; if tied, newer first
@@ -326,4 +328,41 @@ export function exportResultsToTSV(results: QuizResult[]): string {
   });
 
   return [headers.join('\t'), ...rows].join('\n');
+}
+
+// Banner / Photo Slide settings
+export function loadBannerSettings(): BannerSettings {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.BANNER_SETTINGS);
+    if (!raw) {
+      localStorage.setItem(STORAGE_KEYS.BANNER_SETTINGS, JSON.stringify(DEFAULT_BANNER_SETTINGS));
+      return DEFAULT_BANNER_SETTINGS;
+    }
+    const parsed = JSON.parse(raw);
+    if (parsed && Array.isArray(parsed.slides) && parsed.slides.length > 0) {
+      return { ...DEFAULT_BANNER_SETTINGS, ...parsed };
+    }
+    return DEFAULT_BANNER_SETTINGS;
+  } catch (err) {
+    console.error('Error loading banner settings:', err);
+    return DEFAULT_BANNER_SETTINGS;
+  }
+}
+
+export function saveBannerSettings(settings: BannerSettings): void {
+  try {
+    localStorage.setItem(STORAGE_KEYS.BANNER_SETTINGS, JSON.stringify(settings));
+  } catch (err) {
+    console.error('Error saving banner settings:', err);
+  }
+}
+
+export function resetBannerSettings(): BannerSettings {
+  try {
+    localStorage.setItem(STORAGE_KEYS.BANNER_SETTINGS, JSON.stringify(DEFAULT_BANNER_SETTINGS));
+    return DEFAULT_BANNER_SETTINGS;
+  } catch (err) {
+    console.error('Error resetting banner settings:', err);
+    return DEFAULT_BANNER_SETTINGS;
+  }
 }

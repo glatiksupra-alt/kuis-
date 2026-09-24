@@ -248,7 +248,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
                     <span>Masuk sebagai Merchandiser</span>
                   </h2>
                   <p className="text-[11px] font-medium text-slate-500">
-                    Akses pengerjaan pertanyaan evaluasi & podium juara
+                    Akses pengerjaan kuis evaluasi merchandising KAO
                   </p>
                 </div>
               </div>
