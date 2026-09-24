@@ -49,3 +49,12 @@ export interface QuizResult {
 export type AppView = 'quiz-start' | 'quiz-taking' | 'quiz-result' | 'spreadsheet' | 'admin' | 'podium';
 
 export type AppMode = 'md' | 'admin';
+
+export interface AuthUser {
+  id: string;
+  name: string;
+  identifier: string; // NIK / ID Karyawan MD or ID Supervisor
+  role: 'md' | 'admin';
+  area?: string; // e.g. Alfamart, Indomaret, Hypermart, Superindo, dll.
+  loginAt: string;
+}

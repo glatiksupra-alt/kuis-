@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Award, CheckCircle2, Clock, HelpCircle, Play, ShieldCheck, Sparkles, Trophy, Users, Zap } from 'lucide-react';
 import { motion } from 'motion/react';
-import { Question, QuizResult, QuizSettings, AppMode } from '../types';
+import { Question, QuizResult, QuizSettings, AppMode, AuthUser } from '../types';
 import { sounds } from '../utils/sound';
 
 interface QuizStartProps {
@@ -13,6 +13,7 @@ interface QuizStartProps {
   onOpenAdmin: () => void;
   appMode?: AppMode;
   onViewPodium?: () => void;
+  currentUser?: AuthUser | null;
 }
 
 export const QuizStart: React.FC<QuizStartProps> = ({
@@ -24,10 +25,22 @@ export const QuizStart: React.FC<QuizStartProps> = ({
   onOpenAdmin,
   appMode = 'md',
   onViewPodium,
+  currentUser,
 }) => {
-  const [name, setName] = useState('');
-  const [identifier, setIdentifier] = useState('');
+  const [name, setName] = useState(() => currentUser?.name || '');
+  const [identifier, setIdentifier] = useState(() => 
+    currentUser ? `${currentUser.identifier}${currentUser.area ? ` • ${currentUser.area}` : ''}` : ''
+  );
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (currentUser) {
+      if (!name) setName(currentUser.name);
+      if (!identifier) {
+        setIdentifier(`${currentUser.identifier}${currentUser.area ? ` • ${currentUser.area}` : ''}`);
+      }
+    }
+  }, [currentUser]);
 
   const totalPoints = questions.reduce((sum, q) => sum + q.points, 0);
   const topScorer = topResults.length > 0 ? topResults[0] : null;
@@ -162,6 +175,33 @@ export const QuizStart: React.FC<QuizStartProps> = ({
               {settings.description}
             </p>
           </div>
+
+          {/* Active Logged In User Info Banner */}
+          {currentUser && (
+            <div className="mb-5 p-3 rounded-2xl bg-emerald-50/90 border-2 border-emerald-200/90 flex items-center justify-between text-xs text-emerald-950 shadow-2xs">
+              <div className="flex items-center space-x-2.5">
+                <div className="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-black text-xs shadow-xs">
+                  ✓
+                </div>
+                <div>
+                  <div className="flex items-center space-x-1.5">
+                    <span className="font-black text-emerald-950 text-xs">
+                      {currentUser.name}
+                    </span>
+                    <span className="text-[9px] font-black bg-emerald-200/80 text-emerald-800 px-1.5 py-0.2 rounded-full border border-emerald-300">
+                      {currentUser.role === 'admin' ? 'ADMIN' : 'MD'}
+                    </span>
+                  </div>
+                  <span className="text-[11px] text-emerald-700 block">
+                    ID: {currentUser.identifier} {currentUser.area ? `• ${currentUser.area}` : ''}
+                  </span>
+                </div>
+              </div>
+              <span className="text-[10px] font-bold text-emerald-800 bg-white px-2 py-1 rounded-lg border border-emerald-200 shadow-2xs">
+                Data Terverifikasi
+              </span>
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>

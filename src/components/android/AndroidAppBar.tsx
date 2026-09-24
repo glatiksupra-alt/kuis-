@@ -10,9 +10,11 @@ import {
   Lock,
   Shield,
   ShieldCheck,
-  UserCheck
+  UserCheck,
+  LogOut,
+  User
 } from 'lucide-react';
-import { AppView, AppMode } from '../../types';
+import { AppView, AppMode, AuthUser } from '../../types';
 import { sounds } from '../../utils/sound';
 
 interface AndroidAppBarProps {
@@ -24,6 +26,8 @@ interface AndroidAppBarProps {
   appMode?: AppMode;
   onRequestAdminMode?: () => void;
   onSwitchToMdMode?: () => void;
+  currentUser?: AuthUser | null;
+  onLogout?: () => void;
 }
 
 export const AndroidAppBar: React.FC<AndroidAppBarProps> = ({
@@ -35,6 +39,8 @@ export const AndroidAppBar: React.FC<AndroidAppBarProps> = ({
   appMode = 'md',
   onRequestAdminMode,
   onSwitchToMdMode,
+  currentUser,
+  onLogout,
 }) => {
   const [soundActive, setSoundActive] = useState(() => sounds.isSoundEnabled());
   const [copiedToast, setCopiedToast] = useState(false);
@@ -207,6 +213,26 @@ export const AndroidAppBar: React.FC<AndroidAppBarProps> = ({
             <VolumeX className="w-4 h-4" />
           )}
         </button>
+
+        {/* User Profile & Logout */}
+        {currentUser && (
+          <div className="flex items-center pl-1 border-l border-slate-200">
+            <button
+              type="button"
+              onClick={() => {
+                if (window.confirm(`Keluar dari akun ${currentUser.name}? Anda akan kembali ke halaman login.`)) {
+                  sounds.playPop();
+                  onLogout?.();
+                }
+              }}
+              className="px-2 py-1 rounded-full text-[10px] font-black bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 flex items-center space-x-1 transition-all active:scale-95 cursor-pointer shadow-2xs"
+              title={`Keluar dari Akun (${currentUser.name} - ${currentUser.identifier})`}
+            >
+              <LogOut className="w-3 h-3 text-rose-600" />
+              <span className="hidden sm:inline max-w-[65px] truncate">{currentUser.name.split(' ')[0]}</span>
+            </button>
+          </div>
+        )}
       </div>
     </header>
   );

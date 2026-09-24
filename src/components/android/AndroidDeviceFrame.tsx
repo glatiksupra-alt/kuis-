@@ -11,7 +11,7 @@ import {
 import { AndroidStatusBar } from './AndroidStatusBar';
 import { AndroidAppBar } from './AndroidAppBar';
 import { AndroidBottomNav } from './AndroidBottomNav';
-import { AppView, AppMode } from '../../types';
+import { AppView, AppMode, AuthUser } from '../../types';
 import { sounds } from '../../utils/sound';
 
 export type DeviceDisplayMode = 'android-frame' | 'mobile-fit' | 'desktop-wide';
@@ -28,6 +28,9 @@ interface AndroidDeviceFrameProps {
   appMode?: AppMode;
   onRequestAdminMode?: () => void;
   onSwitchToMdMode?: () => void;
+  currentUser?: AuthUser | null;
+  onLogout?: () => void;
+  hideNavBars?: boolean;
 }
 
 export const AndroidDeviceFrame: React.FC<AndroidDeviceFrameProps> = ({
@@ -41,6 +44,9 @@ export const AndroidDeviceFrame: React.FC<AndroidDeviceFrameProps> = ({
   appMode = 'md',
   onRequestAdminMode,
   onSwitchToMdMode,
+  currentUser,
+  onLogout,
+  hideNavBars = false,
 }) => {
   const [displayMode, setDisplayMode] = useState<DeviceDisplayMode>('android-frame');
   const [frameColor, setFrameColor] = useState<DeviceFrameColor>('obsidian');
@@ -200,53 +206,65 @@ export const AndroidDeviceFrame: React.FC<AndroidDeviceFrameProps> = ({
         // Desktop Wide Mode (expanded standard view with mobile app bar & bottom nav optional)
         <div className="w-full max-w-6xl mx-auto bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col min-h-[85vh] border-2 border-slate-200">
           <AndroidStatusBar />
-          <AndroidAppBar 
-            currentView={currentView}
-            onNavigate={onNavigate}
-            participantCount={participantCount}
-            isAdminAuthenticated={isAdminAuthenticated}
-            onLockAdmin={onLockAdmin}
-            appMode={appMode}
-            onRequestAdminMode={onRequestAdminMode}
-            onSwitchToMdMode={onSwitchToMdMode}
-          />
+          {!hideNavBars && (
+            <AndroidAppBar 
+              currentView={currentView}
+              onNavigate={onNavigate}
+              participantCount={participantCount}
+              isAdminAuthenticated={isAdminAuthenticated}
+              onLockAdmin={onLockAdmin}
+              appMode={appMode}
+              onRequestAdminMode={onRequestAdminMode}
+              onSwitchToMdMode={onSwitchToMdMode}
+              currentUser={currentUser}
+              onLogout={onLogout}
+            />
+          )}
           <main className="flex-1 overflow-y-auto bg-slate-50 p-4 sm:p-6">
             {children}
           </main>
-          <AndroidBottomNav 
-            currentView={currentView}
-            onNavigate={onNavigate}
-            participantCount={participantCount}
-            questionCount={questionCount}
-            isAdminAuthenticated={isAdminAuthenticated}
-            appMode={appMode}
-          />
+          {!hideNavBars && (
+            <AndroidBottomNav 
+              currentView={currentView}
+              onNavigate={onNavigate}
+              participantCount={participantCount}
+              questionCount={questionCount}
+              isAdminAuthenticated={isAdminAuthenticated}
+              appMode={appMode}
+            />
+          )}
         </div>
       ) : effectiveMode === 'mobile-fit' ? (
         // Mobile Fit Mode (borderless mobile app viewport, ideal on real phones or clean mobile simulator)
         <div className="w-full max-w-md mx-auto bg-white min-h-screen sm:min-h-[880px] sm:max-h-[920px] sm:rounded-3xl shadow-2xl overflow-hidden flex flex-col border sm:border-2 border-slate-300 relative">
           <AndroidStatusBar />
-          <AndroidAppBar 
-            currentView={currentView}
-            onNavigate={onNavigate}
-            participantCount={participantCount}
-            isAdminAuthenticated={isAdminAuthenticated}
-            onLockAdmin={onLockAdmin}
-            appMode={appMode}
-            onRequestAdminMode={onRequestAdminMode}
-            onSwitchToMdMode={onSwitchToMdMode}
-          />
+          {!hideNavBars && (
+            <AndroidAppBar 
+              currentView={currentView}
+              onNavigate={onNavigate}
+              participantCount={participantCount}
+              isAdminAuthenticated={isAdminAuthenticated}
+              onLockAdmin={onLockAdmin}
+              appMode={appMode}
+              onRequestAdminMode={onRequestAdminMode}
+              onSwitchToMdMode={onSwitchToMdMode}
+              currentUser={currentUser}
+              onLogout={onLogout}
+            />
+          )}
           <main className="flex-1 overflow-y-auto bg-slate-50 relative">
             {children}
           </main>
-          <AndroidBottomNav 
-            currentView={currentView}
-            onNavigate={onNavigate}
-            participantCount={participantCount}
-            questionCount={questionCount}
-            isAdminAuthenticated={isAdminAuthenticated}
-            appMode={appMode}
-          />
+          {!hideNavBars && (
+            <AndroidBottomNav 
+              currentView={currentView}
+              onNavigate={onNavigate}
+              participantCount={participantCount}
+              questionCount={questionCount}
+              isAdminAuthenticated={isAdminAuthenticated}
+              appMode={appMode}
+            />
+          )}
         </div>
       ) : (
         // Android Frame Mode (Realistic Smartphone with chassis, physical buttons, curved bezel)
@@ -276,16 +294,20 @@ export const AndroidDeviceFrame: React.FC<AndroidDeviceFrameProps> = ({
               <AndroidStatusBar />
 
               {/* Android App Header */}
-              <AndroidAppBar 
-                currentView={currentView}
-                onNavigate={onNavigate}
-                participantCount={participantCount}
-                isAdminAuthenticated={isAdminAuthenticated}
-                onLockAdmin={onLockAdmin}
-                appMode={appMode}
-                onRequestAdminMode={onRequestAdminMode}
-                onSwitchToMdMode={onSwitchToMdMode}
-              />
+              {!hideNavBars && (
+                <AndroidAppBar 
+                  currentView={currentView}
+                  onNavigate={onNavigate}
+                  participantCount={participantCount}
+                  isAdminAuthenticated={isAdminAuthenticated}
+                  onLockAdmin={onLockAdmin}
+                  appMode={appMode}
+                  onRequestAdminMode={onRequestAdminMode}
+                  onSwitchToMdMode={onSwitchToMdMode}
+                  currentUser={currentUser}
+                  onLogout={onLogout}
+                />
+              )}
 
               {/* Scrollable App Screen Viewport */}
               <main className="flex-1 overflow-y-auto bg-slate-50 relative overscroll-contain">
@@ -293,14 +315,16 @@ export const AndroidDeviceFrame: React.FC<AndroidDeviceFrameProps> = ({
               </main>
 
               {/* Android Material 3 Bottom Navigation Bar */}
-              <AndroidBottomNav 
-                currentView={currentView}
-                onNavigate={onNavigate}
-                participantCount={participantCount}
-                questionCount={questionCount}
-                isAdminAuthenticated={isAdminAuthenticated}
-                appMode={appMode}
-              />
+              {!hideNavBars && (
+                <AndroidBottomNav 
+                  currentView={currentView}
+                  onNavigate={onNavigate}
+                  participantCount={participantCount}
+                  questionCount={questionCount}
+                  isAdminAuthenticated={isAdminAuthenticated}
+                  appMode={appMode}
+                />
+              )}
             </div>
           </div>
         </div>

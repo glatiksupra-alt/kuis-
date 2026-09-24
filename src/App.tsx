@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { AppView, AppMode, Question, QuizResult, QuizSettings } from './types';
+import { AppView, AppMode, AuthUser, Question, QuizResult, QuizSettings } from './types';
 import { 
   addQuizResult, 
   clearAllQuizResults, 
@@ -12,7 +12,9 @@ import {
   saveQuizSettings, 
   sortResultsDescending,
   getSavedAppMode,
-  saveAppMode
+  saveAppMode,
+  loadAuthUser,
+  clearAuthUser
 } from './utils/storage';
 import { Navbar } from './components/Navbar';
 import { QuizStart } from './components/QuizStart';
@@ -21,10 +23,12 @@ import { QuizResultView } from './components/QuizResult';
 import { SpreadsheetView } from './components/SpreadsheetView';
 import { AdminPanel } from './components/AdminPanel';
 import { PodiumView } from './components/PodiumView';
+import { LoginScreen } from './components/LoginScreen';
 import { AndroidDeviceFrame } from './components/android/AndroidDeviceFrame';
 import { AdminPinModal } from './components/android/AdminPinModal';
 
 export default function App() {
+  const [currentUser, setCurrentUser] = useState<AuthUser | null>(() => loadAuthUser());
   const [currentView, setCurrentView] = useState<AppView>('quiz-start');
   const [questions, setQuestions] = useState<Question[]>([]);
   const [settings, setSettings] = useState<QuizSettings>(loadQuizSettings);
@@ -32,8 +36,8 @@ export default function App() {
   
   // App Mode State: Mode 'md' is the default mode (Merchandiser: only questions & podium)
   // Mode 'admin' requires PIN verification to access questions bank, settings, and spreadsheet
-  const [appMode, setAppMode] = useState<AppMode>('md');
-  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
+  const [appMode, setAppMode] = useState<AppMode>(() => (currentUser?.role === 'admin' ? 'admin' : 'md'));
+  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(() => currentUser?.role === 'admin');
   const [showAdminPinModal, setShowAdminPinModal] = useState(false);
   const [pendingAdminView, setPendingAdminView] = useState<AppView | null>(null);
   
@@ -179,6 +183,31 @@ export default function App() {
     }
   };
 
+  // Login handler
+  const handleLoginSuccess = (user: AuthUser) => {
+    setCurrentUser(user);
+    if (user.role === 'admin') {
+      setAppMode('admin');
+      setIsAdminAuthenticated(true);
+      saveAppMode('admin');
+    } else {
+      setAppMode('md');
+      setIsAdminAuthenticated(false);
+      saveAppMode('md');
+    }
+    setCurrentView('quiz-start');
+  };
+
+  // Logout handler
+  const handleLogout = () => {
+    clearAuthUser();
+    setCurrentUser(null);
+    setIsAdminAuthenticated(false);
+    setAppMode('md');
+    setCurrentView('quiz-start');
+    setLastResult(null);
+  };
+
   const handleNavigate = (view: AppView) => {
     if (view === 'quiz-start' && currentView === 'quiz-taking') {
       if (!window.confirm('Evaluasi kuis sedang berlangsung. Anda yakin ingin kembali ke menu utama?')) {
@@ -197,6 +226,22 @@ export default function App() {
     setCurrentView(view);
   };
 
+  // If user is not logged in yet, show dedicated Login Screen inside Android frame
+  if (!currentUser) {
+    return (
+      <AndroidDeviceFrame
+        currentView="quiz-start"
+        onNavigate={() => {}}
+        participantCount={results.length}
+        questionCount={questions.length}
+        hideNavBars={true}
+        appMode={appMode}
+      >
+        <LoginScreen onLoginSuccess={handleLoginSuccess} />
+      </AndroidDeviceFrame>
+    );
+  }
+
   return (
     <>
       <AndroidDeviceFrame
@@ -209,6 +254,8 @@ export default function App() {
         appMode={appMode}
         onRequestAdminMode={() => handleRequestAdminMode()}
         onSwitchToMdMode={handleSwitchToMdMode}
+        currentUser={currentUser}
+        onLogout={handleLogout}
       >
         {currentView === 'quiz-start' && (
           <QuizStart
@@ -220,6 +267,7 @@ export default function App() {
             onOpenAdmin={() => handleNavigate('admin')}
             appMode={appMode}
             onViewPodium={() => setCurrentView('podium')}
+            currentUser={currentUser}
           />
         )}
 

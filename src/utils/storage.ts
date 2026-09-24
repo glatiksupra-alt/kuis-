@@ -1,4 +1,4 @@
-import { Question, QuizResult, QuizSettings } from '../types';
+import { Question, QuizResult, QuizSettings, AuthUser } from '../types';
 import { DEFAULT_QUESTIONS, DEFAULT_QUIZ_SETTINGS, INITIAL_SAMPLE_RESULTS } from '../data/defaultQuiz';
 
 const STORAGE_KEYS = {
@@ -7,6 +7,7 @@ const STORAGE_KEYS = {
   RESULTS: 'kao_merchandising_results_v2',
   ADMIN_PIN: 'kao_merchandising_admin_pin_v2',
   APP_MODE: 'kao_merchandising_mode_v2',
+  AUTH_USER: 'kao_merchandising_auth_user_v2',
 };
 
 // Sort results: highest score first; if tied, faster duration first; if tied, newer first
@@ -192,6 +193,44 @@ export function saveAppMode(mode: 'md' | 'admin'): void {
     }
   } catch (err) {
     console.error('Error saving app mode:', err);
+  }
+}
+
+export function loadAuthUser(): AuthUser | null {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.AUTH_USER) || sessionStorage.getItem(STORAGE_KEYS.AUTH_USER);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+}
+
+export function saveAuthUser(user: AuthUser | null, rememberMe: boolean = true): void {
+  try {
+    if (!user) {
+      localStorage.removeItem(STORAGE_KEYS.AUTH_USER);
+      sessionStorage.removeItem(STORAGE_KEYS.AUTH_USER);
+      return;
+    }
+    const val = JSON.stringify(user);
+    if (rememberMe) {
+      localStorage.setItem(STORAGE_KEYS.AUTH_USER, val);
+    } else {
+      sessionStorage.setItem(STORAGE_KEYS.AUTH_USER, val);
+    }
+  } catch (err) {
+    console.error('Error saving auth user:', err);
+  }
+}
+
+export function clearAuthUser(): void {
+  try {
+    localStorage.removeItem(STORAGE_KEYS.AUTH_USER);
+    sessionStorage.removeItem(STORAGE_KEYS.AUTH_USER);
+    sessionStorage.removeItem(STORAGE_KEYS.APP_MODE);
+  } catch {
+    // ignore
   }
 }
 
